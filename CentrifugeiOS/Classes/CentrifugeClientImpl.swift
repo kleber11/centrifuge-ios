@@ -153,8 +153,7 @@ class CentrifugeClientImpl: NSObject, CentrifugeClient, WebSocketDelegate {
         }
         
         guard let msgs = messages else {
-            assertionFailure("Error: Empty messages array without error")
-            return
+            self.connect(withCompletion: { (message, error) in })
         }
         
         for message in msgs {
@@ -165,8 +164,7 @@ class CentrifugeClientImpl: NSObject, CentrifugeClient, WebSocketDelegate {
     func defaultProcessHandler(message: CentrifugeServerMessage) {
         var handled = false
         if let uid = message.uid, messageCallbacks[uid] == nil {
-            assertionFailure("Error: Untracked message is received")
-            return
+            self.connect(withCompletion: { (message, error) in })
         }
         
         if let uid = message.uid, let handler = messageCallbacks[uid], message.error != nil {
@@ -240,6 +238,7 @@ class CentrifugeClientImpl: NSObject, CentrifugeClient, WebSocketDelegate {
     }
     
     func websocketDidReceiveMessage(socket: WebSocketClient, text: String) {
+        socket.connect()
         let data = text.data(using: String.Encoding.utf8)!
         let messages = try! parser.parse(data: data)
         
