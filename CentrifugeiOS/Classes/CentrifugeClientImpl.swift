@@ -129,7 +129,7 @@ class CentrifugeClientImpl: NSObject, CentrifugeClient, WebSocketDelegate {
         }
         
         guard let message = messages?.first else {
-            assertionFailure("Error: Empty messages array")
+            self.connect(withCompletion: { (message, error) in })
             return
         }
         
@@ -154,6 +154,7 @@ class CentrifugeClientImpl: NSObject, CentrifugeClient, WebSocketDelegate {
         
         guard let msgs = messages else {
             self.connect(withCompletion: { (message, error) in })
+            return
         }
         
         for message in msgs {
@@ -165,7 +166,8 @@ class CentrifugeClientImpl: NSObject, CentrifugeClient, WebSocketDelegate {
         var handled = false
         if let uid = message.uid, messageCallbacks[uid] == nil {
             self.connect(withCompletion: { (message, error) in })
-        }
+            return
+    }
         
         if let uid = message.uid, let handler = messageCallbacks[uid], message.error != nil {
             let error = NSError.errorWithMessage(message: message)
