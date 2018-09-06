@@ -233,12 +233,12 @@ class CentrifugeClientImpl: NSObject, CentrifugeClient, WebSocketDelegate {
     }
     
     func websocketDidDisconnect(socket: WebSocketClient, error: Error?) {
+        socket.connect()
         guard let handler = blockingHandler else { return }
         handler(nil, error)
     }
     
     func websocketDidReceiveMessage(socket: WebSocketClient, text: String) {
-        socket.connect()
         let data = text.data(using: String.Encoding.utf8)!
         let messages = try! parser.parse(data: data)
         
